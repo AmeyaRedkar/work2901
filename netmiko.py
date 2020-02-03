@@ -1,59 +1,35 @@
-from paramiko import SSHClient, AutoAddPolicy
+from netmiko import ConnectHandler
 from configparser import ConfigParser
-
 
 config=ConfigParser()
 config.read("C:\\Users\\appam\\Desktop\\work2901\\configuration.txt")
-user=config["sshtest"]["username"]
-passwd=config["sshtest"]["password"]
 
+vendor=["netmiko"]["vendor"]
+username=["netmiko"]["username"]
+password=["netmiko"]["password"]
 ipaddresses=open("C:\\Users\\appam\\Desktop\\work2901\\workscript\\ipaddress.txt","r+")
+result=open("C:\\Users\\appam\\Desktop\\work2901\\workscript\\sadaoutput.txt","w+")
 
-sshoutput=open("C:\\Users\\appam\\Desktop\\work2901\\workscript\\sshoutput.txt","w+")
-
-erroutput=open("C:\\Users\\appam\\Desktop\\work2901\\workscript\\erroutput.txt","w+")
-
-ipaddresses.seek(0)
-
+paddresses.seek(0)
 iplist1=ipaddresses.readline()
-
 iplist2=[x.strip('\n') for x in iplist1]
 
-session=SSHClient()
-
-session.set_missing_host_key_policy(AutoAddPolicy())
-
-
 for ip in iplist2:
-	print "checking ip {}".format(ip)
 
-	session.connect(ip, username = user, password = passwd)
+	connection=ConnectHandler(
+		"device_type":vendor,
+		"host":ip,
+		"username":username,
+		"password":password,
+		#"port":optional
+		#"secret":optional
+		)
 
-	stdin, stdout, stderr = session.exec_command("ping {}".format(ip))
+	output = connection.send_command("ping {}".format(ip))
 
-	output=stdout.readlines()
-	
-	error=stderr.readlines()
-
-	for op in output:
-		sshoutput.write(op)
-
-	sshoutput.write("*"*60)
-
-	for er in error:
-		erroutput.write(er)
-
-	erroutput.write("*"*60)
-
-
-session.close()
+	result.write("*"*60)
+	result.write(output)
 
 ipaddresses.close()
-sshoutput.close()
-erroutput.close()
-
-
-
-
+result.close()
 	
-
